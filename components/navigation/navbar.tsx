@@ -15,17 +15,28 @@ import {
   HeartHandshake,
   Menu,
   X,
-  Radio,
   ExternalLink,
+  Lock,
+  LogOut,
+  Radio,
 } from "lucide-react";
 
 export function Navbar({ onToggleSidebar }: { onToggleSidebar?: () => void }) {
   const pathname = usePathname();
-  const { role, notifications, markNotificationAsRead, clearAllNotifications, triggerSos, isSosActive } = useApp();
+  const {
+    role,
+    notifications,
+    markNotificationAsRead,
+    clearAllNotifications,
+    triggerSos,
+    isSosActive,
+    isRoleUnlocked,
+    lockRole,
+  } = useApp();
   const [showNotifications, setShowNotifications] = useState(false);
 
   const unreadCount = notifications.filter((n) => !n.read).length;
-
+  const isCurrentUnlocked = isRoleUnlocked(role);
   const roleHomeHref = `/${role}`;
 
   return (
@@ -170,17 +181,34 @@ export function Navbar({ onToggleSidebar }: { onToggleSidebar?: () => void }) {
 
           <ThemeToggle />
 
-          {/* Go to Active Dashboard Link */}
-          <Link
-            href={roleHomeHref}
-            className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl text-white shadow-sm transition-all ${
-              pathname.startsWith(`/${role}`)
-                ? "bg-slate-900 dark:bg-white dark:text-slate-900"
-                : "bg-gradient-to-r from-pink-600 to-violet-600 hover:opacity-95"
-            }`}
-          >
-            <span>{role.charAt(0).toUpperCase() + role.slice(1)} Portal</span>
-          </Link>
+          {/* Go to Active Dashboard Link & Lock Button */}
+          <div className="flex items-center gap-1.5">
+            <Link
+              href={roleHomeHref}
+              className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl text-white shadow-sm transition-all ${
+                pathname.startsWith(`/${role}`)
+                  ? "bg-slate-900 dark:bg-white dark:text-slate-900"
+                  : "bg-gradient-to-r from-pink-600 to-violet-600 hover:opacity-95"
+              }`}
+            >
+              {role !== "student" && !isCurrentUnlocked && <Lock className="w-3.5 h-3.5 text-amber-300" />}
+              <span>
+                {role.charAt(0).toUpperCase() + role.slice(1)}{" "}
+                {role !== "student" && !isCurrentUnlocked ? "(Locked)" : "Portal"}
+              </span>
+            </Link>
+
+            {role !== "student" && isCurrentUnlocked && (
+              <button
+                onClick={() => lockRole(role)}
+                className="hidden sm:flex items-center gap-1 px-2.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-xs font-semibold text-slate-600 dark:text-slate-300 transition"
+                title="Lock this portal and sign out"
+              >
+                <LogOut className="w-3.5 h-3.5 text-red-500" />
+                <span className="text-[11px]">Lock</span>
+              </button>
+            )}
+          </div>
         </div>
       </div>
 

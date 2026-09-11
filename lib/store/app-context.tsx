@@ -42,6 +42,11 @@ interface AppContextType {
     lng: number;
   } | null;
 
+  unlockedRoles: Record<UserRole, boolean>;
+  isRoleUnlocked: (role: UserRole) => boolean;
+  unlockRole: (role: UserRole, usernameOrEmail: string, pass: string) => Promise<{ success: boolean; error?: string }>;
+  lockRole: (role: UserRole) => void;
+
   // Actions
   markAttendance: (studentId: string, status: "present" | "late" | "absent", method?: "qr_scan" | "rfid_tap" | "manual") => void;
   recordDeparture: (studentId: string) => void;
@@ -73,6 +78,58 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     lat: number;
     lng: number;
   } | null>(null);
+
+  const [unlockedRoles, setUnlockedRoles] = useState<Record<UserRole, boolean>>({
+    student: true,
+    admin: false,
+    teacher: false,
+    parent: false,
+  });
+
+  const isRoleUnlocked = (r: UserRole): boolean => {
+    if (r === "student") return true;
+    return Boolean(unlockedRoles[r]);
+  };
+
+  const unlockRole = async (
+    targetRole: UserRole,
+    usernameOrEmail: string,
+    pass: string
+  ): Promise<{ success: boolean; error?: string }> => {
+    const cleanInput = usernameOrEmail.trim().toLowerCase();
+    const cleanPass = pass.trim();
+
+    const credentialsMap: Record<UserRole, { emails: string[]; pass: string; name: string }> = {
+      admin: { emails: ["admin@safeaischool.edu", "admin"], pass: "SafeAdmin@2026", name: "Principal Farah Qureshi" },
+      teacher: { emails: ["teacher@safeaischool.edu", "teacher", "amina.qureshi@faculty.safeaischool.edu"], pass: "Teacher@2026", name: "Dr. Amina Qureshi" },
+      parent: { emails: ["parent@safeaischool.edu", "parent", "tariq.ahmed@parent.safeaischool.edu"], pass: "Parent@2026", name: "Tariq Ahmed" },
+      student: { emails: ["sara.ahmed@student.safeaischool.edu", "student"], pass: "Student@2026", name: "Sara Ahmed" },
+    };
+
+    const targetCreds = credentialsMap[targetRole];
+    if (!targetCreds) return { success: false, error: "Invalid role specified." };
+
+    const matchesUser = targetCreds.emails.includes(cleanInput);
+    const matchesPass = cleanPass === targetCreds.pass;
+
+    if (!matchesUser || !matchesPass) {
+      return {
+        success: false,
+        error: `Incorrect credentials for ${targetRole.toUpperCase()}. Please check your username/email and password.`,
+      };
+    }
+
+    setUnlockedRoles((prev) => ({ ...prev, [targetRole]: true }));
+    setRole(targetRole);
+    return { success: true };
+  };
+
+  const lockRole = (r: UserRole) => {
+    setUnlockedRoles((prev) => ({ ...prev, [r]: false }));
+    if (role === r) {
+      setRole("student");
+    }
+  };
 
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
     {
@@ -341,6 +398,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       value={{
         role,
         setRole,
+        unlockedRoles,
+        isRoleUnlocked,
+        unlockRole,
+        lockRole,
         students,
         attendance,
         notifications,
