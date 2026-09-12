@@ -363,3 +363,21 @@ export interface StudentProgressNote {
   read: boolean;
   channel: "app" | "whatsapp" | "sms";
 }
+
+export interface ParentMessage {
+  id: string;
+  senderType: "teacher" | "admin" | "parent";
+  senderName: string;
+  senderRole?: string;
+  recipientName: string;
+  studentId?: string;
+  studentName?: string;
+  subject: string;
+  message: string;
+  timestamp: string;
+  unread: boolean;
+  channel: "app" | "sms" | "email";
+  category: "general" | "academic" | "attendance" | "announcement";
+  replyCount?: number;
+}
+

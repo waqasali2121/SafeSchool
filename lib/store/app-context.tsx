@@ -22,6 +22,7 @@ import {
   Subject,
   StudyMaterial,
   StudentProgressNote,
+  ParentMessage,
 } from "../types";
 import {
   INITIAL_STUDENTS,
@@ -42,7 +43,9 @@ import {
   INITIAL_TEACHER_COMPLIANCE,
   INITIAL_STUDY_MATERIALS,
   INITIAL_PROGRESS_NOTES,
+  INITIAL_PARENT_MESSAGES,
 } from "../mock-data";
+
 import { generateRAGAnswer, addLocalDocument, getLocalDocuments } from "../rag/engine";
 
 interface AppContextType {
@@ -76,6 +79,14 @@ interface AppContextType {
   subjects: Subject[];
   studyMaterials: StudyMaterial[];
   progressNotes: StudentProgressNote[];
+  parentMessages: ParentMessage[];
+
+  // Parent Role Multi-Child & Comms
+  activeChildId: string;
+  setActiveChildId: (id: string) => void;
+  sendParentInquiry: (teacherName: string, subject: string, message: string, studentId?: string) => void;
+  markParentMessageAsRead: (id: string) => void;
+  acknowledgeEmergencyBroadcast: (alertId: string) => void;
 
   unlockedRoles: Record<UserRole, boolean>;
   isRoleUnlocked: (role: UserRole) => boolean;
@@ -147,6 +158,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [subjects, setSubjects] = useState<Subject[]>(INITIAL_SUBJECTS);
   const [studyMaterials, setStudyMaterials] = useState<StudyMaterial[]>(INITIAL_STUDY_MATERIALS);
   const [progressNotes, setProgressNotes] = useState<StudentProgressNote[]>(INITIAL_PROGRESS_NOTES);
+  const [parentMessages, setParentMessages] = useState<ParentMessage[]>(INITIAL_PARENT_MESSAGES);
+  const [activeChildId, setActiveChildId] = useState<string>("stu-1");
+
 
   const [unlockedRoles, setUnlockedRoles] = useState<Record<UserRole, boolean>>({
     student: true,
@@ -824,6 +838,57 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     );
   };
 
+  // Parent Role Communication Handlers
+  const sendParentInquiry = (teacherName: string, subject: string, message: string, studentId?: string) => {
+    const targetStudentId = studentId || activeChildId;
+    const student = students.find((s) => s.id === targetStudentId);
+    const newMsg: ParentMessage = {
+      id: `pmsg-${Date.now()}`,
+      senderType: "parent",
+      senderName: "Tariq Ahmed (Guardian)",
+      senderRole: "Parent",
+      recipientName: teacherName,
+      studentId: targetStudentId,
+      studentName: student?.fullName || "Sara Ahmed",
+      subject,
+      message,
+      timestamp: "Just now",
+      unread: false,
+      channel: "app",
+      category: "general",
+      replyCount: 0,
+    };
+    setParentMessages((prev) => [newMsg, ...prev]);
+
+    addAuditLog(
+      "PARENT_INQUIRY_DISPATCHED",
+      teacherName,
+      `Guardian Tariq Ahmed sent direct inquiry regarding ${student?.fullName || "student"}: "${subject}"`,
+      "info"
+    );
+  };
+
+  const markParentMessageAsRead = (id: string) => {
+    setParentMessages((prev) =>
+      prev.map((m) => (m.id === id ? { ...m, unread: false } : m))
+    );
+  };
+
+  const acknowledgeEmergencyBroadcast = (alertId: string) => {
+    setAlerts((prev) =>
+      prev.map((a) =>
+        a.id === alertId ? { ...a, readCount: (a.readCount || 0) + 1 } : a
+      )
+    );
+    const alert = alerts.find((a) => a.id === alertId);
+    addAuditLog(
+      "EMERGENCY_BROADCAST_ACKNOWLEDGED",
+      alert?.title || alertId,
+      `Guardian Tariq Ahmed verified safe digital receipt for broadcast "${alert?.title || alertId}"`,
+      "info"
+    );
+  };
+
   return (
     <AppContext.Provider
       value={{
@@ -832,6 +897,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         unlockedRoles,
         isRoleUnlocked,
         unlockRole,
+
         lockRole,
         students,
         attendance,
@@ -884,8 +950,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         addStudyMaterial,
         sendStudentProgressNote,
         batchSubmitAttendance,
+        // Parent Role Handlers & Multi-Child
+        parentMessages,
+        activeChildId,
+        setActiveChildId,
+        sendParentInquiry,
+        markParentMessageAsRead,
+        acknowledgeEmergencyBroadcast,
       }}
     >
+
       {children}
     </AppContext.Provider>
   );

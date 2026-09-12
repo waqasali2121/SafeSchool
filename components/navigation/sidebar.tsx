@@ -29,7 +29,9 @@ import {
   Building2,
   UserPlus,
   ShieldCheck,
+  MessageSquare,
 } from "lucide-react";
+
 
 export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose?: () => void }) {
   const pathname = usePathname();
@@ -65,8 +67,10 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose?: () => 
           { href: "/parent/attendance", label: "Arrival / Departure Logs", icon: <Clock className="w-4 h-4" /> },
           { href: "/parent/academics", label: "Report Card & Marks", icon: <Award className="w-4 h-4" /> },
           { href: "/parent/homework", label: "Homework Tracker", icon: <CheckSquare className="w-4 h-4" /> },
+          { href: "/parent/messages", label: "Communication Hub", icon: <MessageSquare className="w-4 h-4 text-pink-500" />, badge: "Inbox" },
           { href: "/parent/emergency", label: "Emergency & Helplines", icon: <ShieldAlert className="w-4 h-4 text-red-500" /> },
         ];
+
       case "student":
       default:
         return [

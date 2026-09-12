@@ -22,7 +22,9 @@ import {
   TeacherCompliance,
   StudyMaterial,
   StudentProgressNote,
+  ParentMessage,
 } from "./types";
+
 
 export const INITIAL_CLASSES: SchoolClass[] = [
   { id: "c-10a", name: "Grade 10 - Lily", gradeLevel: 10, section: "A", roomNumber: "Lab 3", studentCount: 28, capacity: 30, classTeacher: "Dr. Amina Qureshi" },
@@ -116,6 +118,25 @@ export const INITIAL_STUDENTS: Student[] = [
     lastSafetyCheckin: "Today at 07:40 AM",
     attendanceRate: 99.1,
   },
+  {
+    id: "stu-5",
+    userId: "u-stu-5",
+    fullName: "Zainab Ahmed",
+    rollNumber: "SAF-2026-088",
+    classId: "c-8a",
+    className: "Grade 8 - Daisy",
+    parentId: "par-1",
+    parentName: "Tariq Ahmed",
+    parentPhone: "+1 (555) 349-2810",
+    parentEmail: "tariq.ahmed@example.com",
+    bloodGroup: "O+",
+    rfidCardId: "RFID-99486",
+    qrCodeToken: "QR-ZAINAB-AHMED-8A-99486",
+    photoUrl: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=300&q=80",
+    isInsideCampus: true,
+    lastSafetyCheckin: "Today at 07:42 AM",
+    attendanceRate: 97.2,
+  },
 ];
 
 export const INITIAL_PARENTS: Parent[] = [
@@ -124,13 +145,14 @@ export const INITIAL_PARENTS: Parent[] = [
     userId: "u-par-1",
     fullName: "Tariq Ahmed",
     relationship: "Father",
-    studentIds: ["stu-1"],
-    studentNames: ["Sara Ahmed"],
+    studentIds: ["stu-1", "stu-5"],
+    studentNames: ["Sara Ahmed", "Zainab Ahmed"],
     emergencyPhone: "+1 (555) 349-2810",
     whatsappEnabled: true,
     address: "742 Evergreen Terrace, Sector F-8",
   },
 ];
+
 
 export const INITIAL_TEACHERS: Teacher[] = [
   {
@@ -196,7 +218,21 @@ export const INITIAL_ATTENDANCE: AttendanceRecord[] = [
     parentNotifiedArrival: true,
     parentNotifiedDeparture: false,
   },
+  {
+    id: "att-5",
+    studentId: "stu-5",
+    studentName: "Zainab Ahmed",
+    rollNumber: "SAF-2026-088",
+    className: "Grade 8 - Daisy",
+    date: new Date().toISOString().split("T")[0],
+    checkIn: "07:42 AM",
+    method: "rfid_tap",
+    status: "present",
+    parentNotifiedArrival: true,
+    parentNotifiedDeparture: false,
+  },
 ];
+
 
 export const INITIAL_NOTIFICATIONS: NotificationItem[] = [
   {
@@ -332,7 +368,32 @@ export const INITIAL_HOMEWORK: HomeworkItem[] = [
     totalStudents: 28,
     isCompletedByStudent: false,
   },
+  {
+    id: "hw-4",
+    title: "Ecosystems & Food Chains Diagram",
+    description: "Draw and label a temperate forest food web including primary producers, secondary consumers, and apex predators.",
+    subject: "General Science",
+    className: "Grade 8 - Daisy",
+    dueDate: "Tomorrow, 3:00 PM",
+    assignedBy: "Engr. Noor Fatima",
+    submissionsCount: 20,
+    totalStudents: 25,
+    isCompletedByStudent: true,
+  },
+  {
+    id: "hw-5",
+    title: "Linear Equations & Graphing Worksheet",
+    description: "Complete exercises 1 to 10 on graphing slopes and identifying y-intercepts.",
+    subject: "Mathematics",
+    className: "Grade 8 - Daisy",
+    dueDate: "Monday, 9:00 AM",
+    assignedBy: "Ms. Hiba Rashid",
+    submissionsCount: 14,
+    totalStudents: 25,
+    isCompletedByStudent: false,
+  },
 ];
+
 
 export const INITIAL_MARKS: MarkItem[] = [
   {
@@ -383,7 +444,44 @@ export const INITIAL_MARKS: MarkItem[] = [
     teacherRemarks: "Good conceptual understanding of Newtonian dynamics; practice numerical problems on projectile motion.",
     date: "2026-09-01",
   },
+  {
+    id: "m-5",
+    studentId: "stu-5",
+    studentName: "Zainab Ahmed",
+    subject: "General Science",
+    examType: "Mid-Term Examination",
+    obtainedMarks: 91,
+    totalMarks: 100,
+    grade: "A+",
+    teacherRemarks: "Exceptional diagrams and clarity in describing plant cell vacuoles and osmosis.",
+    date: "2026-09-03",
+  },
+  {
+    id: "m-6",
+    studentId: "stu-5",
+    studentName: "Zainab Ahmed",
+    subject: "Mathematics",
+    examType: "Monthly Quiz 2",
+    obtainedMarks: 44,
+    totalMarks: 50,
+    grade: "A",
+    teacherRemarks: "Strong algebraic manipulation skills. Continue practicing simultaneous linear equations.",
+    date: "2026-09-06",
+  },
+  {
+    id: "m-7",
+    studentId: "stu-5",
+    studentName: "Zainab Ahmed",
+    subject: "English Literature",
+    examType: "Essay Assessment",
+    obtainedMarks: 46,
+    totalMarks: 50,
+    grade: "A+",
+    teacherRemarks: "Insightful literary analysis and eloquent vocabulary in the poetry comparison essay.",
+    date: "2026-09-09",
+  },
 ];
+
 
 export const INITIAL_DOCUMENTS: RAGDocument[] = [
   {
@@ -1173,4 +1271,83 @@ export const INITIAL_PROGRESS_NOTES: StudentProgressNote[] = [
     read: false,
     channel: "sms",
   },
+  {
+    id: "pn-4",
+    studentId: "stu-5",
+    studentName: "Zainab Ahmed",
+    parentName: "Tariq Ahmed",
+    teacherName: "Engr. Noor Fatima",
+    subject: "General Science",
+    category: "academic",
+    note: "Zainab presented a magnificent ecosystem food web poster in class today! Her peer collaboration is commendable.",
+    sentAt: "Today at 09:15 AM",
+    read: true,
+    channel: "app",
+  },
 ];
+
+export const INITIAL_PARENT_MESSAGES: ParentMessage[] = [
+  {
+    id: "pmsg-1",
+    senderType: "teacher",
+    senderName: "Dr. Amina Qureshi",
+    senderRole: "Lead Biology Educator & Head of Science",
+    recipientName: "Tariq Ahmed",
+    studentId: "stu-1",
+    studentName: "Sara Ahmed",
+    subject: "Mid-Term Lab Practical Readiness & Commendation",
+    message: "Assalamu Alaikum Mr. Tariq, I would like to commend Sara on her thorough preparation for upcoming biology practicals. Her microscope slide preparation was among the top in Grade 10. We encourage her to keep up this dedication for the terminal exams.",
+    timestamp: "Today at 10:45 AM",
+    unread: true,
+    channel: "app",
+    category: "academic",
+    replyCount: 1,
+  },
+  {
+    id: "pmsg-2",
+    senderType: "teacher",
+    senderName: "Engr. Noor Fatima",
+    senderRole: "Junior Science & AI Educator",
+    recipientName: "Tariq Ahmed",
+    studentId: "stu-5",
+    studentName: "Zainab Ahmed",
+    subject: "Zainab's Robotics Fair Project Selection",
+    message: "Respected Guardian, Zainab has submitted an outstanding project proposal for the upcoming Girls STEM & Robotics exhibition (Solar Automated Hydroponics). We have approved her concept and assigned her to Lab 2.",
+    timestamp: "Yesterday at 03:20 PM",
+    unread: false,
+    channel: "app",
+    category: "academic",
+    replyCount: 0,
+  },
+  {
+    id: "pmsg-3",
+    senderType: "admin",
+    senderName: "Principal Farah Qureshi",
+    senderRole: "School Executive Principal",
+    recipientName: "All School Families",
+    subject: "Official Announcement: Annual Parent-Teacher Academic Conference",
+    message: "Dear Parents and Guardians, Our Fall Semester Parent-Teacher Academic Consultation Day is scheduled for Friday, Oct 24, 2026. Online 15-minute slot reservations with subject faculty will open via this portal next Monday. We look forward to partnering in your child's academic flourishing.",
+    timestamp: "Sep 10, 2026",
+    unread: false,
+    channel: "email",
+    category: "announcement",
+    replyCount: 0,
+  },
+  {
+    id: "pmsg-4",
+    senderType: "teacher",
+    senderName: "Ms. Hiba Rashid",
+    senderRole: "Mathematics Department Lead",
+    recipientName: "Tariq Ahmed",
+    studentId: "stu-1",
+    studentName: "Sara Ahmed",
+    subject: "Quadratic Equations Diagnostic Practice",
+    message: "Dear Mr. Ahmed, Sara scored 48/50 on Monthly Quiz 3. She has a solid grasp of the quadratic formula. I have shared extra enrichment problems for discriminant analysis which will prepare her nicely for Olympiad math.",
+    timestamp: "Sep 08, 2026",
+    unread: false,
+    channel: "sms",
+    category: "academic",
+    replyCount: 2,
+  },
+];
+
