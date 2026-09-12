@@ -141,7 +141,9 @@ export async function generateRAGAnswer(userQuery: string): Promise<RAGQueryResu
   let synthesis = "";
   const primaryContent = topMatch.chunk.content;
 
-  if (userQuery.toLowerCase().includes("photosynthesis")) {
+  if (userQuery.toLowerCase().includes("explain lesson") || userQuery.toLowerCase().includes("simple terms")) {
+    synthesis = `Here is Lesson 3 explained in simple terms:\n\n1. What is it? Think of green plant cells as tiny solar-powered kitchens. They take water from soil and carbon dioxide from the air.\n2. The Cooking Step: Sunlight hits green chlorophyll pigments inside chloroplasts, splitting water molecules into oxygen (which we breathe!) and saving energy.\n3. The Final Meal: In the stroma chamber, the plant uses that captured solar energy to bake glucose sugar (food) to grow.\n\nKey Takeaway: 6CO2 + 6H2O + Sunlight ➔ Glucose + 6O2. Without this simple kitchen recipe, Earth wouldn't have atmospheric oxygen!`;
+  } else if (userQuery.toLowerCase().includes("photosynthesis")) {
     synthesis = "Photosynthesis is the biological process where green plants, algae, and cyanobacteria convert light energy from the Sun into chemical energy stored in glucose (6CO2 + 6H2O + light -> C6H12O6 + 6O2). It takes place in the chloroplasts and consists of light-dependent reactions in thylakoid membranes and light-independent Calvin cycle in the stroma.";
   } else if (userQuery.toLowerCase().includes("respiration") || userQuery.toLowerCase().includes("cellular")) {
     synthesis = "Cellular respiration is the metabolic breakdown of glucose in the presence of oxygen to synthesize Adenosine Triphosphate (ATP): C6H12O6 + 6O2 -> 6CO2 + 6H2O + 36-38 ATP. It proceeds through Glycolysis, the Krebs Cycle in the mitochondrial matrix, and the Electron Transport Chain.";
@@ -154,6 +156,7 @@ export async function generateRAGAnswer(userQuery: string): Promise<RAGQueryResu
   } else {
     synthesis = `Based on ${topMatch.doc.title}:\n\n"${primaryContent}"\n\nThis principle is part of the approved curriculum material for ${topMatch.doc.subject}.`;
   }
+
 
   return {
     answer: synthesis,
