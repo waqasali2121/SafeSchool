@@ -85,6 +85,8 @@ export interface AttendanceRecord {
   status: "present" | "late" | "absent" | "excused";
   parentNotifiedArrival: boolean;
   parentNotifiedDeparture: boolean;
+  periodNumber?: number;
+  periodName?: string;
 }
 
 export interface NotificationItem {
@@ -328,4 +330,36 @@ export interface TeacherCompliance {
   marksEnteredRate: number;
   complianceStatus: "compliant" | "warning" | "overdue";
   lastActive: string;
+}
+
+export type StudyMaterialType = "pdf" | "slide_deck" | "syllabus" | "homework" | "video_tutorial";
+
+export interface StudyMaterial {
+  id: string;
+  title: string;
+  subject: string;
+  className: string;
+  lessonChapter: string;
+  type: StudyMaterialType;
+  fileUrl?: string;
+  videoUrl?: string;
+  description: string;
+  uploadedBy: string;
+  uploadedAt: string;
+  fileSizeKb?: number;
+  ragIndexed?: boolean;
+}
+
+export interface StudentProgressNote {
+  id: string;
+  studentId: string;
+  studentName: string;
+  parentName: string;
+  teacherName: string;
+  subject: string;
+  category: "academic" | "behavioral" | "homework" | "remedial";
+  note: string;
+  sentAt: string;
+  read: boolean;
+  channel: "app" | "whatsapp" | "sms";
 }

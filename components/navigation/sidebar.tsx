@@ -51,12 +51,13 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose?: () => 
       case "teacher":
         return [
           { href: "/teacher", label: "Teacher Command Center", icon: <LayoutDashboard className="w-4 h-4" /> },
-          { href: "/teacher/attendance", label: "Smart Attendance Marker", icon: <QrCode className="w-4 h-4" />, badge: "QR/RFID" },
-          { href: "/admin/alerts", label: "Issue Parent Alert", icon: <BellRing className="w-4 h-4 text-rose-500" />, badge: "Urgent" },
+          { href: "/teacher/attendance", label: "Push Attendance Marker", icon: <QrCode className="w-4 h-4" />, badge: "Period/QR" },
+          { href: "/teacher/materials", label: "Study Material & Notes", icon: <BookOpen className="w-4 h-4 text-emerald-500" />, badge: "Uploads" },
+          { href: "/teacher/marks", label: "Assessment & Gradebook", icon: <Award className="w-4 h-4 text-violet-500" />, badge: "Assess" },
+          { href: "/teacher/announcements", label: "Direct Parent Comms", icon: <Megaphone className="w-4 h-4 text-pink-500" />, badge: "Direct" },
           { href: "/teacher/homework", label: "Homework Manager", icon: <CheckSquare className="w-4 h-4" /> },
-          { href: "/teacher/marks", label: "Marks & Gradebook", icon: <Award className="w-4 h-4" /> },
           { href: "/teacher/mcq-generator", label: "MCQ & Quiz Builder", icon: <Sparkles className="w-4 h-4" />, badge: "AI" },
-          { href: "/teacher/announcements", label: "Parent Broadcasts", icon: <Megaphone className="w-4 h-4" /> },
+          { href: "/admin/alerts", label: "Issue Parent Alert", icon: <BellRing className="w-4 h-4 text-rose-500" />, badge: "Urgent" },
         ];
       case "parent":
         return [

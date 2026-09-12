@@ -20,6 +20,8 @@ import {
   TeacherCompliance,
   SchoolClass,
   Subject,
+  StudyMaterial,
+  StudentProgressNote,
 } from "../types";
 import {
   INITIAL_STUDENTS,
@@ -38,6 +40,8 @@ import {
   INITIAL_TIMETABLE,
   INITIAL_AUDIT_LOGS,
   INITIAL_TEACHER_COMPLIANCE,
+  INITIAL_STUDY_MATERIALS,
+  INITIAL_PROGRESS_NOTES,
 } from "../mock-data";
 import { generateRAGAnswer, addLocalDocument, getLocalDocuments } from "../rag/engine";
 
@@ -70,6 +74,8 @@ interface AppContextType {
   teacherCompliance: TeacherCompliance[];
   classes: SchoolClass[];
   subjects: Subject[];
+  studyMaterials: StudyMaterial[];
+  progressNotes: StudentProgressNote[];
 
   unlockedRoles: Record<UserRole, boolean>;
   isRoleUnlocked: (role: UserRole) => boolean;
@@ -88,7 +94,7 @@ interface AppContextType {
   markNotificationAsRead: (id: string) => void;
   clearAllNotifications: () => void;
 
-  // New Core Module Actions
+  // Core Module Actions
   issueAlert: (alertData: Omit<StudentAlert, "id" | "createdAt" | "deliveryStatus" | "deliveredCount" | "readCount" | "totalRecipients">) => void;
   addUserAccount: (user: Omit<UserAccount, "id" | "createdAt">) => void;
   updateUserAccount: (id: string, updates: Partial<UserAccount>) => void;
@@ -102,6 +108,12 @@ interface AppContextType {
   updateTimetableSlot: (slot: TimetableSlot) => void;
   addAuditLog: (action: string, targetEntity: string, details: string, severity?: "info" | "warning" | "critical") => void;
   sendComplianceReminder: (teacherId: string) => void;
+
+  // Teacher Classroom Operations Actions
+  recordStudentMark: (mark: Omit<MarkItem, "id" | "date">) => void;
+  addStudyMaterial: (material: Omit<StudyMaterial, "id" | "uploadedAt">) => void;
+  sendStudentProgressNote: (note: Omit<StudentProgressNote, "id" | "sentAt" | "read">) => void;
+  batchSubmitAttendance: (className: string, periodNumber: number, periodName: string, records: { studentId: string; status: "present" | "late" | "absent" }[]) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -112,7 +124,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [attendance, setAttendance] = useState<AttendanceRecord[]>(INITIAL_ATTENDANCE);
   const [notifications, setNotifications] = useState<NotificationItem[]>(INITIAL_NOTIFICATIONS);
   const [homework, setHomework] = useState<HomeworkItem[]>(INITIAL_HOMEWORK);
-  const [marks] = useState<MarkItem[]>(INITIAL_MARKS);
+  const [marks, setMarks] = useState<MarkItem[]>(INITIAL_MARKS);
   const [documents, setDocuments] = useState<RAGDocument[]>(INITIAL_DOCUMENTS);
   const [emergencyContacts] = useState<EmergencyContact[]>(EMERGENCY_CONTACTS);
   const [isSosActive, setIsSosActive] = useState(false);
@@ -133,6 +145,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [teacherCompliance, setTeacherCompliance] = useState<TeacherCompliance[]>(INITIAL_TEACHER_COMPLIANCE);
   const [classes, setClasses] = useState<SchoolClass[]>(INITIAL_CLASSES);
   const [subjects, setSubjects] = useState<Subject[]>(INITIAL_SUBJECTS);
+  const [studyMaterials, setStudyMaterials] = useState<StudyMaterial[]>(INITIAL_STUDY_MATERIALS);
+  const [progressNotes, setProgressNotes] = useState<StudentProgressNote[]>(INITIAL_PROGRESS_NOTES);
 
   const [unlockedRoles, setUnlockedRoles] = useState<Record<UserRole, boolean>>({
     student: true,
@@ -644,6 +658,172 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     );
   };
 
+  const recordStudentMark = (mark: Omit<MarkItem, "id" | "date">) => {
+    const todayStr = new Date().toISOString().split("T")[0];
+    const newMark: MarkItem = {
+      ...mark,
+      id: `m-${Date.now()}`,
+      date: todayStr,
+    };
+    setMarks((prev) => [newMark, ...prev]);
+
+    // Parent notification
+    const student = students.find((s) => s.id === mark.studentId);
+    const notif: NotificationItem = {
+      id: `notif-mark-${Date.now()}`,
+      recipientId: student?.parentId || "par-1",
+      recipientRole: "parent",
+      category: "marks",
+      title: `Assessment Score Published: ${mark.subject}`,
+      message: `${mark.studentName} scored ${mark.obtainedMarks}/${mark.totalMarks} (Grade ${mark.grade}) in ${mark.examType}. Remarks: "${mark.teacherRemarks}"`,
+      read: false,
+      channel: "app",
+      createdAt: "Just now",
+      studentName: mark.studentName,
+    };
+    setNotifications((prev) => [notif, ...prev]);
+
+    addAuditLog(
+      "ASSESSMENT_RECORDED",
+      `${mark.studentName} (${mark.subject})`,
+      `Recorded ${mark.examType} score: ${mark.obtainedMarks}/${mark.totalMarks} (Grade ${mark.grade}). Remarks: "${mark.teacherRemarks}"`,
+      "info"
+    );
+  };
+
+  const addStudyMaterial = (mat: Omit<StudyMaterial, "id" | "uploadedAt">) => {
+    const timeStr = `Today at ${new Date().toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true })}`;
+    const newMat: StudyMaterial = {
+      ...mat,
+      id: `mat-${Date.now()}`,
+      uploadedAt: timeStr,
+    };
+    setStudyMaterials((prev) => [newMat, ...prev]);
+
+    if (mat.type === "pdf" && mat.ragIndexed) {
+      uploadDocument(
+        mat.title,
+        mat.subject,
+        mat.className,
+        `Class Study Material: ${mat.title} for ${mat.lessonChapter}. Description: ${mat.description}`
+      );
+    }
+
+    addAuditLog(
+      "STUDY_MATERIAL_UPLOADED",
+      `${mat.title} (${mat.subject})`,
+      `Uploaded ${mat.type} curriculum resource for ${mat.lessonChapter}.`,
+      "info"
+    );
+  };
+
+  const sendStudentProgressNote = (noteData: Omit<StudentProgressNote, "id" | "sentAt" | "read">) => {
+    const timeStr = `Today at ${new Date().toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true })}`;
+    const newNote: StudentProgressNote = {
+      ...noteData,
+      id: `pn-${Date.now()}`,
+      sentAt: timeStr,
+      read: false,
+    };
+    setProgressNotes((prev) => [newNote, ...prev]);
+
+    const notif: NotificationItem = {
+      id: `notif-pn-${Date.now()}`,
+      recipientId: "par-1",
+      recipientRole: "parent",
+      category: noteData.category === "academic" ? "marks" : noteData.category === "homework" ? "homework" : "announcements",
+      title: `Progress Note from ${noteData.teacherName}`,
+      message: `Regarding ${noteData.studentName} (${noteData.subject}): "${noteData.note}"`,
+      read: false,
+      channel: noteData.channel,
+      createdAt: "Just now",
+      studentName: noteData.studentName,
+    };
+    setNotifications((prev) => [notif, ...prev]);
+
+    addAuditLog(
+      "PROGRESS_NOTE_SENT",
+      `${noteData.studentName} (Parent: ${noteData.parentName})`,
+      `Sent direct ${noteData.category} progress note via ${noteData.channel.toUpperCase()}: "${noteData.note}"`,
+      "info"
+    );
+  };
+
+  const batchSubmitAttendance = (
+    className: string,
+    periodNumber: number,
+    periodName: string,
+    records: { studentId: string; status: "present" | "late" | "absent" }[]
+  ) => {
+    const todayStr = new Date().toISOString().split("T")[0];
+    const timeString = new Date().toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true });
+
+    // Update attendance state
+    setAttendance((prev) => {
+      let updated = [...prev];
+      records.forEach((rec) => {
+        const student = students.find((s) => s.id === rec.studentId);
+        if (!student) return;
+
+        const existingIdx = updated.findIndex(
+          (a) => a.studentId === rec.studentId && a.date === todayStr && a.periodNumber === periodNumber
+        );
+
+        const newRec: AttendanceRecord = {
+          id: existingIdx >= 0 ? updated[existingIdx].id : `att-${Date.now()}-${rec.studentId}`,
+          studentId: rec.studentId,
+          studentName: student.fullName,
+          rollNumber: student.rollNumber,
+          className,
+          date: todayStr,
+          checkIn: rec.status !== "absent" ? timeString : undefined,
+          method: "manual",
+          status: rec.status,
+          parentNotifiedArrival: rec.status !== "absent",
+          parentNotifiedDeparture: false,
+          periodNumber,
+          periodName,
+        };
+
+        if (existingIdx >= 0) {
+          updated[existingIdx] = newRec;
+        } else {
+          updated = [newRec, ...updated];
+        }
+      });
+      return updated;
+    });
+
+    // Auto-trigger alerts for any absences
+    const absentees = records.filter((r) => r.status === "absent");
+    absentees.forEach((abs) => {
+      const student = students.find((s) => s.id === abs.studentId);
+      if (!student) return;
+
+      const absenceNotif: NotificationItem = {
+        id: `notif-abs-${Date.now()}-${student.id}`,
+        recipientId: student.parentId,
+        recipientRole: "parent",
+        category: "attendance",
+        title: "URGENT ATTENDANCE: Absence Alert",
+        message: `Your daughter ${student.fullName} was marked ABSENT for ${periodName} (Period ${periodNumber}) at ${timeString}. Please confirm if this is an excused absence.`,
+        read: false,
+        channel: "sms",
+        createdAt: "Just now",
+        studentName: student.fullName,
+        urgent: true,
+      };
+      setNotifications((prev) => [absenceNotif, ...prev]);
+    });
+
+    addAuditLog(
+      "PERIOD_ATTENDANCE_SUBMITTED",
+      `${className} (${periodName} - P${periodNumber})`,
+      `Submitted digital attendance for ${records.length} students. Present: ${records.filter((r) => r.status === "present").length}, Late: ${records.filter((r) => r.status === "late").length}, Absent: ${absentees.length}. Automated parent absence alerts dispatched.`,
+      absentees.length > 0 ? "warning" : "info"
+    );
+  };
+
   return (
     <AppContext.Provider
       value={{
@@ -683,6 +863,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         teacherCompliance,
         classes,
         subjects,
+        studyMaterials,
+        progressNotes,
         // Core Module Handlers
         issueAlert,
         addUserAccount,
@@ -697,6 +879,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         updateTimetableSlot,
         addAuditLog,
         sendComplianceReminder,
+        // Teacher Operations Handlers
+        recordStudentMark,
+        addStudyMaterial,
+        sendStudentProgressNote,
+        batchSubmitAttendance,
       }}
     >
       {children}
