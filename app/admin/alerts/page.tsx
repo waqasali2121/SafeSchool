@@ -24,7 +24,7 @@ import {
 } from "lucide-react";
 
 export default function AdminAlertsPage() {
-  const { students, classes, alerts, issueAlert } = useApp();
+  const { students, classes, alerts, issueAlert, sendWhatsAppMessage } = useApp();
 
   // Form states
   const [targetType, setTargetType] = useState<"all" | "class" | "individual">("all");
@@ -80,6 +80,18 @@ export default function AdminAlertsPage() {
       channels,
       dispatchedBy: "Principal Farah Qureshi",
     });
+
+    if (channels.includes("whatsapp")) {
+      const recipientPhone = student?.parentPhone || "+1 (555) 349-2810";
+      const recipientName = student ? `${student.parentName} (${student.fullName})` : "School Family";
+      sendWhatsAppMessage(
+        recipientPhone,
+        `🚨 [SafeAI Alert: ${severity.toUpperCase()}] ${title}: ${message}`,
+        "alert",
+        recipientName,
+        student?.fullName
+      );
+    }
 
     setDispatchSuccess(true);
     setTimeout(() => {

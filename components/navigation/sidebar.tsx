@@ -30,6 +30,7 @@ import {
   UserPlus,
   ShieldCheck,
   MessageSquare,
+  MessageCircle,
 } from "lucide-react";
 
 
@@ -47,6 +48,7 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose?: () => 
           { href: "/admin/structure", label: "School Structure Setup", icon: <Building2 className="w-4 h-4 text-emerald-500" />, badge: "Setup" },
           { href: "/admin/students", label: "Student Registry", icon: <Users className="w-4 h-4" /> },
           { href: "/admin/teachers", label: "Faculty Directory", icon: <GraduationCap className="w-4 h-4" /> },
+          { href: "/admin/whatsapp", label: "WhatsApp Gateway", icon: <MessageCircle className="w-4 h-4 text-emerald-500" />, badge: "Live" },
           { href: "/admin/documents", label: "RAG Knowledge Base", icon: <BookOpen className="w-4 h-4" />, badge: "AI" },
           { href: "/admin/analytics", label: "Analytics & Audit Logs", icon: <BarChart3 className="w-4 h-4 text-violet-500" />, badge: "Audit" },
         ];
