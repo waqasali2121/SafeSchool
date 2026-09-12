@@ -80,12 +80,14 @@ export function ChatInterface() {
   };
 
   const samplePrompts = [
-    "Explain photosynthesis",
-    "Summarize chapter 5",
-    "What is the quadratic formula?",
+    "Explain lesson 3 in simple terms",
+    "Explain photosynthesis with real-world analogies",
+    "What is the quadratic formula and discriminant?",
+    "Break down cellular respiration step-by-step",
+    "Summarize chapter 5 key exam takeaways",
     "SafeAI Campus Emergency & SOS Protocol",
-    "Give important exam questions",
   ];
+
 
   return (
     <div className="flex flex-col h-[740px] rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-xl overflow-hidden">
