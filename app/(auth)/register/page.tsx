@@ -22,12 +22,12 @@ export default function RegisterPage() {
     <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center p-4 bg-gradient-to-b from-slate-50 to-pink-50/20 dark:from-slate-950 dark:to-slate-900">
       <div className="w-full max-w-lg rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-8 shadow-xl">
         <div className="text-center mb-6">
-          <div className="w-16 h-16 rounded-full overflow-hidden bg-white border border-slate-200 dark:border-slate-700 mx-auto shadow-md mb-3 flex items-center justify-center">
+          <div className="w-20 h-20 rounded-full overflow-hidden bg-white border border-slate-200 dark:border-slate-700 mx-auto shadow-md mb-3 flex items-center justify-center p-0.5">
             <Image
               src="/logo.png"
               alt="SafeAI School Logo"
-              width={64}
-              height={64}
+              width={80}
+              height={80}
               className="w-full h-full object-contain"
               priority
             />
