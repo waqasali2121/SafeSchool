@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useApp } from "@/lib/store/app-context";
 import { RoleSwitcher } from "./role-switcher";
@@ -55,8 +56,15 @@ export function Navbar({ onToggleSidebar }: { onToggleSidebar?: () => void }) {
           )}
 
           <Link href="/" className="flex items-center gap-2.5 group">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-pink-500 via-rose-500 to-violet-600 flex items-center justify-center text-white shadow-md shadow-pink-500/20 group-hover:scale-105 transition-transform">
-              <Sparkles className="w-5 h-5" />
+            <div className="w-10 h-10 rounded-full overflow-hidden flex items-center justify-center shadow-md border border-slate-200 dark:border-slate-700 bg-white group-hover:scale-105 transition-transform shrink-0">
+              <Image
+                src="/logo.png"
+                alt="SafeAI School Logo"
+                width={40}
+                height={40}
+                className="w-full h-full object-contain"
+                priority
+              />
             </div>
             <div>
               <div className="flex items-center gap-1.5">

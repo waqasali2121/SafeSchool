@@ -2,8 +2,9 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { Sparkles, CheckCircle2 } from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -21,8 +22,15 @@ export default function RegisterPage() {
     <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center p-4 bg-gradient-to-b from-slate-50 to-pink-50/20 dark:from-slate-950 dark:to-slate-900">
       <div className="w-full max-w-lg rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-8 shadow-xl">
         <div className="text-center mb-6">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-pink-500 via-rose-500 to-violet-600 flex items-center justify-center text-white mx-auto shadow-md shadow-pink-500/20 mb-3">
-            <Sparkles className="w-6 h-6" />
+          <div className="w-16 h-16 rounded-full overflow-hidden bg-white border border-slate-200 dark:border-slate-700 mx-auto shadow-md mb-3 flex items-center justify-center">
+            <Image
+              src="/logo.png"
+              alt="SafeAI School Logo"
+              width={64}
+              height={64}
+              className="w-full h-full object-contain"
+              priority
+            />
           </div>
           <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
             Student Enrollment & Safety Registry

@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useApp } from "@/lib/store/app-context";
 import { QrScannerModal } from "@/components/attendance/qr-scanner-modal";
 import {
@@ -49,6 +50,20 @@ export default function LandingPage() {
         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[350px] bg-gradient-to-tr from-pink-500/15 via-purple-500/10 to-emerald-500/15 blur-3xl -z-10 pointer-events-none rounded-full" />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          {/* Brand Logo Presentation */}
+          <div className="flex justify-center mb-6">
+            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden bg-white border-2 border-pink-200 dark:border-pink-900 shadow-xl shadow-pink-500/10 flex items-center justify-center p-1 hover:scale-105 transition-transform">
+              <Image
+                src="/logo.png"
+                alt="SafeAI School Logo"
+                width={96}
+                height={96}
+                className="w-full h-full object-contain"
+                priority
+              />
+            </div>
+          </div>
+
           {/* Badge */}
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-pink-100/90 dark:bg-pink-950/60 border border-pink-200 dark:border-pink-800 text-pink-700 dark:text-pink-300 text-xs font-bold mb-8 shadow-xs animate-in fade-in">
             <Sparkles className="w-4 h-4 text-pink-500" />
@@ -533,9 +548,18 @@ export default function LandingPage() {
       {/* FOOTER */}
       <footer className="border-t border-slate-200 dark:border-slate-800 py-10 bg-white dark:bg-slate-950 text-xs text-slate-500 dark:text-slate-400">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2.5">
+            <div className="w-7 h-7 rounded-full overflow-hidden bg-white border border-slate-200 dark:border-slate-700 flex items-center justify-center shrink-0">
+              <Image
+                src="/logo.png"
+                alt="SafeAI School"
+                width={28}
+                height={28}
+                className="w-full h-full object-contain"
+              />
+            </div>
             <span className="font-black text-slate-900 dark:text-white">SafeAI School</span>
-            <span>• Every Girl Safe. Every Parent Connected. Every Student Empowered.</span>
+            <span className="hidden md:inline">• Every Girl Safe. Every Parent Connected. Every Student Empowered.</span>
           </div>
           <div>
             <span>© {new Date().getFullYear()} SafeAI School Inc. All rights reserved.</span>

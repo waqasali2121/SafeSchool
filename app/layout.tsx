@@ -12,6 +12,10 @@ export const metadata: Metadata = {
   title: "SafeAI School – AI Powered Smart School Safety & Learning Platform",
   description:
     "Every Girl Safe. Every Parent Connected. Every Student Empowered. Modern AI-powered school ecosystem combining smart attendance tracking, parent safety notifications, student academic management, homework, emergency safety system, and an intelligent RAG learning assistant.",
+  icons: {
+    icon: "/logo.png",
+    apple: "/logo.png",
+  },
 };
 
 export default function RootLayout({

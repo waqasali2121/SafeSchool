@@ -1,7 +1,8 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useApp } from "@/lib/store/app-context";
 import {
@@ -112,12 +113,18 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose?: () => 
             {/* Active Persona Banner */}
             <div className="p-3.5 rounded-2xl bg-gradient-to-tr from-pink-50 to-violet-50 dark:from-pink-950/20 dark:to-violet-950/20 border border-pink-100 dark:border-pink-900/40">
               <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-pink-500 to-rose-600 text-white flex items-center justify-center font-extrabold text-sm shadow">
-                  {role.charAt(0).toUpperCase()}
+                <div className="w-9 h-9 rounded-full overflow-hidden bg-white border border-slate-200 dark:border-slate-700 flex items-center justify-center shrink-0 shadow-sm">
+                  <Image
+                    src="/logo.png"
+                    alt="SafeAI School"
+                    width={36}
+                    height={36}
+                    className="w-full h-full object-contain"
+                  />
                 </div>
                 <div>
-                  <h4 className="text-xs font-extrabold uppercase tracking-wider text-slate-900 dark:text-white">
-                    {role} Dashboard
+                  <h4 className="text-xs font-extrabold uppercase tracking-wider text-slate-900 dark:text-white flex items-center gap-1.5">
+                    <span>{role} Dashboard</span>
                   </h4>
                   <p className="text-[11px] text-slate-500 dark:text-slate-400">
                     SafeAI School Verified
