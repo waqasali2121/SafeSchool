@@ -24,13 +24,13 @@ import {
 export default function ParentMessagesPage() {
   const {
     students,
-    teachers,
     activeChildId,
     parentMessages,
     sendParentInquiry,
     markParentMessageAsRead,
     progressNotes,
   } = useApp();
+
 
   const [activeTab, setActiveTab] = useState<"teachers" | "announcements" | "progress">("teachers");
   const [searchQuery, setSearchQuery] = useState("");
