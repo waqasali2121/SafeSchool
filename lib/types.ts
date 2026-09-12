@@ -421,4 +421,27 @@ export interface TimedPracticeQuestion {
   subject: string;
 }
 
+export interface WhatsAppMessage {
+  id: string;
+  direction: "outbound" | "inbound";
+  fromNumber: string;
+  toNumber: string;
+  recipientName?: string;
+  studentName?: string;
+  content: string;
+  timestamp: string;
+  status: "sent" | "delivered" | "read" | "received" | "failed";
+  templateName?: string;
+  category: "alert" | "attendance" | "marks" | "parent_inquiry" | "general";
+}
+
+export interface WhatsAppConfig {
+  phoneNumberId: string;
+  businessAccountId: string;
+  displayPhoneNumber: string;
+  webhookVerifyToken: string;
+  isLiveConnected: boolean;
+  autoReplyEnabled: boolean;
+}
+
 

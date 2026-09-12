@@ -27,6 +27,8 @@ import {
   RevisionChecklistItem,
   TimedPracticeQuestion,
   Teacher,
+  WhatsAppMessage,
+  WhatsAppConfig,
 } from "../types";
 import {
   INITIAL_STUDENTS,
@@ -52,6 +54,8 @@ import {
   INITIAL_REVISION_CHECKLIST,
   TIMED_PRACTICE_QUESTIONS,
   INITIAL_TEACHERS,
+  INITIAL_WHATSAPP_CONFIG,
+  INITIAL_WHATSAPP_MESSAGES,
 } from "../mock-data";
 
 
@@ -136,6 +140,13 @@ interface AppContextType {
   addStudyMaterial: (material: Omit<StudyMaterial, "id" | "uploadedAt">) => void;
   sendStudentProgressNote: (note: Omit<StudentProgressNote, "id" | "sentAt" | "read">) => void;
   batchSubmitAttendance: (className: string, periodNumber: number, periodName: string, records: { studentId: string; status: "present" | "late" | "absent" }[]) => void;
+
+  // WhatsApp Gateway & Communication
+  whatsAppConfig: WhatsAppConfig;
+  whatsAppMessages: WhatsAppMessage[];
+  updateWhatsAppConfig: (updates: Partial<WhatsAppConfig>) => void;
+  sendWhatsAppMessage: (toNumber: string, content: string, category?: WhatsAppMessage["category"], recipientName?: string, studentName?: string, templateName?: string) => Promise<{ success: boolean; messageId?: string; error?: string }>;
+  simulateInboundWhatsApp: (fromNumber: string, content: string, senderName?: string) => void;
 
   // Student Exam Prep & Revision
   pastPapers: PastExamPaper[];
