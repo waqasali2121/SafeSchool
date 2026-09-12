@@ -58,6 +58,8 @@ export interface Teacher {
   department: string;
   qualification: string;
   assignedClasses: string[];
+  email?: string;
+  phone?: string;
 }
 
 export interface Parent {

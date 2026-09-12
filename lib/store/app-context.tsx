@@ -26,6 +26,7 @@ import {
   PastExamPaper,
   RevisionChecklistItem,
   TimedPracticeQuestion,
+  Teacher,
 } from "../types";
 import {
   INITIAL_STUDENTS,
@@ -50,6 +51,7 @@ import {
   INITIAL_PAST_PAPERS,
   INITIAL_REVISION_CHECKLIST,
   TIMED_PRACTICE_QUESTIONS,
+  INITIAL_TEACHERS,
 } from "../mock-data";
 
 
@@ -87,6 +89,7 @@ interface AppContextType {
   studyMaterials: StudyMaterial[];
   progressNotes: StudentProgressNote[];
   parentMessages: ParentMessage[];
+  teachers: Teacher[];
 
   // Parent Role Multi-Child & Comms
   activeChildId: string;
@@ -126,6 +129,7 @@ interface AppContextType {
   updateTimetableSlot: (slot: TimetableSlot) => void;
   addAuditLog: (action: string, targetEntity: string, details: string, severity?: "info" | "warning" | "critical") => void;
   sendComplianceReminder: (teacherId: string) => void;
+  addTeacher: (teacherData: Omit<Teacher, "id" | "userId"> & { email?: string; phone?: string }) => void;
 
   // Teacher Classroom Operations Actions
   recordStudentMark: (mark: Omit<MarkItem, "id" | "date">) => void;
@@ -175,6 +179,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [activeChildId, setActiveChildId] = useState<string>("stu-1");
   const [pastPapers] = useState<PastExamPaper[]>(INITIAL_PAST_PAPERS);
   const [revisionChecklist, setRevisionChecklist] = useState<RevisionChecklistItem[]>(INITIAL_REVISION_CHECKLIST);
+  const [teachers, setTeachers] = useState<Teacher[]>(INITIAL_TEACHERS);
 
 
   const [unlockedRoles, setUnlockedRoles] = useState<Record<UserRole, boolean>>({
@@ -687,6 +692,49 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     );
   };
 
+  const addTeacher = (teacherData: Omit<Teacher, "id" | "userId"> & { email?: string; phone?: string }) => {
+    const teacherId = `tea-${Date.now()}`;
+    const userId = `usr-tea-${Date.now()}`;
+
+    const newTeacher: Teacher = {
+      id: teacherId,
+      userId,
+      fullName: teacherData.fullName,
+      employeeId: teacherData.employeeId,
+      department: teacherData.department,
+      qualification: teacherData.qualification,
+      assignedClasses: teacherData.assignedClasses,
+      email: teacherData.email,
+      phone: teacherData.phone,
+    };
+
+    setTeachers((prev) => [newTeacher, ...prev]);
+
+    // Automatically create corresponding UserAccount with teacher role
+    const newUserAccount: UserAccount = {
+      id: userId,
+      fullName: teacherData.fullName,
+      email: teacherData.email || `${teacherData.fullName.toLowerCase().replace(/[^a-z0-9]/g, ".")}@faculty.safeaischool.edu`,
+      phone: teacherData.phone || "+1 (555) 000-0000",
+      role: "teacher",
+      status: "active",
+      createdAt: new Date().toISOString().split("T")[0],
+      lastLogin: "Never",
+      employeeId: teacherData.employeeId,
+      department: teacherData.department,
+      qualification: teacherData.qualification,
+      assignedClasses: teacherData.assignedClasses,
+    };
+    setUserAccounts((prev) => [newUserAccount, ...prev]);
+
+    addAuditLog(
+      "FACULTY_MEMBER_ADDED",
+      `${newTeacher.fullName} (${newTeacher.employeeId})`,
+      `Added new faculty educator to ${newTeacher.department} with classes: ${newTeacher.assignedClasses.join(", ") || "General"}. Provisioned user credentials.`,
+      "info"
+    );
+  };
+
   const recordStudentMark = (mark: Omit<MarkItem, "id" | "date">) => {
     const todayStr = new Date().toISOString().split("T")[0];
     const newMark: MarkItem = {
@@ -984,6 +1032,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         pastPapers,
         revisionChecklist,
         toggleRevisionChecklist,
+        // Faculty Directory
+        teachers,
+        addTeacher,
       }}
     >
 

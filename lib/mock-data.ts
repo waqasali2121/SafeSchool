@@ -162,12 +162,36 @@ export const INITIAL_PARENTS: Parent[] = [
 export const INITIAL_TEACHERS: Teacher[] = [
   {
     id: "tea-1",
-    userId: "u-tea-1",
+    userId: "usr-2",
     fullName: "Dr. Amina Qureshi",
     employeeId: "TEA-882",
     department: "Science & Biology",
     qualification: "Ph.D. in Cellular Biology",
     assignedClasses: ["Grade 10 - Lily", "Grade 9 - Rose"],
+    email: "teacher@safeaischool.edu",
+    phone: "+1 (555) 883-9102",
+  },
+  {
+    id: "tea-2",
+    userId: "usr-3",
+    fullName: "Ms. Hiba Rashid",
+    employeeId: "TEA-883",
+    department: "Mathematics & Statistics",
+    qualification: "M.Sc. Pure Mathematics",
+    assignedClasses: ["Grade 10 - Lily", "Grade 10 - Jasmine"],
+    email: "hiba.rashid@faculty.safeaischool.edu",
+    phone: "+1 (555) 772-4019",
+  },
+  {
+    id: "tea-3",
+    userId: "usr-4",
+    fullName: "Mrs. Sarah Jenkins",
+    employeeId: "TEA-884",
+    department: "Humanities & English",
+    qualification: "M.A. English Literature",
+    assignedClasses: ["Grade 10 - Lily", "Grade 9 - Rose"],
+    email: "sarah.jenkins@faculty.safeaischool.edu",
+    phone: "+1 (555) 441-2093",
   },
 ];
 
