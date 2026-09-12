@@ -381,3 +381,42 @@ export interface ParentMessage {
   replyCount?: number;
 }
 
+export interface PastExamPaper {
+  id: string;
+  title: string;
+  subject: string;
+  gradeLevel: number;
+  year: number;
+  term: "Mid-Term" | "Terminal" | "Annual";
+  durationMinutes: number;
+  totalMarks: number;
+  fileSizeKb: number;
+  hasSolutionKey: boolean;
+  downloadUrl?: string;
+}
+
+export interface RevisionChecklistItem {
+  id: string;
+  subject: string;
+  chapter: string;
+  topic: string;
+  isCompleted: boolean;
+  importance: "high" | "medium" | "low";
+  notesSummary?: string;
+}
+
+export interface TimedPracticeQuestion {
+  id: string;
+  question: string;
+  options: {
+    A: string;
+    B: string;
+    C: string;
+    D: string;
+  };
+  correctAnswer: "A" | "B" | "C" | "D";
+  explanation: string;
+  subject: string;
+}
+
+

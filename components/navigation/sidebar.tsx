@@ -76,12 +76,14 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose?: () => 
         return [
           { href: "/student", label: "Student Portal Home", icon: <LayoutDashboard className="w-4 h-4" /> },
           { href: "/student/ai-assistant", label: "AI Learning Companion", icon: <Sparkles className="w-4 h-4 text-pink-500" />, badge: "RAG" },
+          { href: "/student/exams", label: "Exam Prep & Past Papers", icon: <Award className="w-4 h-4 text-amber-500" />, badge: "Exams" },
           { href: "/student/mcq-practice", label: "MCQ Quiz Trainer", icon: <HelpCircle className="w-4 h-4 text-violet-500" /> },
+          { href: "/student/study-tools", label: "AI Study Generator", icon: <Layers className="w-4 h-4 text-emerald-500" />, badge: "Generator" },
           { href: "/student/homework-solver", label: "AI Homework Solver", icon: <FileText className="w-4 h-4 text-blue-500" /> },
-          { href: "/student/assignment-generator", label: "Assignment Generator", icon: <FileQuestion className="w-4 h-4 text-emerald-500" /> },
-          { href: "/student/study-tools", label: "Flashcards & Summaries", icon: <Layers className="w-4 h-4" /> },
+          { href: "/student/assignment-generator", label: "Assignment Generator", icon: <FileQuestion className="w-4 h-4 text-teal-500" /> },
           { href: "/student/sos", label: "Emergency SOS Radar", icon: <ShieldAlert className="w-4 h-4 text-rose-500" />, badge: "Safety" },
         ];
+
     }
   };
 

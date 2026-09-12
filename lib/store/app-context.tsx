@@ -23,6 +23,9 @@ import {
   StudyMaterial,
   StudentProgressNote,
   ParentMessage,
+  PastExamPaper,
+  RevisionChecklistItem,
+  TimedPracticeQuestion,
 } from "../types";
 import {
   INITIAL_STUDENTS,
@@ -44,7 +47,11 @@ import {
   INITIAL_STUDY_MATERIALS,
   INITIAL_PROGRESS_NOTES,
   INITIAL_PARENT_MESSAGES,
+  INITIAL_PAST_PAPERS,
+  INITIAL_REVISION_CHECKLIST,
+  TIMED_PRACTICE_QUESTIONS,
 } from "../mock-data";
+
 
 import { generateRAGAnswer, addLocalDocument, getLocalDocuments } from "../rag/engine";
 
@@ -125,7 +132,13 @@ interface AppContextType {
   addStudyMaterial: (material: Omit<StudyMaterial, "id" | "uploadedAt">) => void;
   sendStudentProgressNote: (note: Omit<StudentProgressNote, "id" | "sentAt" | "read">) => void;
   batchSubmitAttendance: (className: string, periodNumber: number, periodName: string, records: { studentId: string; status: "present" | "late" | "absent" }[]) => void;
+
+  // Student Exam Prep & Revision
+  pastPapers: PastExamPaper[];
+  revisionChecklist: RevisionChecklistItem[];
+  toggleRevisionChecklist: (id: string) => void;
 }
+
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
@@ -160,6 +173,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [progressNotes, setProgressNotes] = useState<StudentProgressNote[]>(INITIAL_PROGRESS_NOTES);
   const [parentMessages, setParentMessages] = useState<ParentMessage[]>(INITIAL_PARENT_MESSAGES);
   const [activeChildId, setActiveChildId] = useState<string>("stu-1");
+  const [pastPapers] = useState<PastExamPaper[]>(INITIAL_PAST_PAPERS);
+  const [revisionChecklist, setRevisionChecklist] = useState<RevisionChecklistItem[]>(INITIAL_REVISION_CHECKLIST);
 
 
   const [unlockedRoles, setUnlockedRoles] = useState<Record<UserRole, boolean>>({
@@ -889,7 +904,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     );
   };
 
+  const toggleRevisionChecklist = (id: string) => {
+    setRevisionChecklist((prev) =>
+      prev.map((item) =>
+        item.id === id ? { ...item, isCompleted: !item.isCompleted } : item
+      )
+    );
+  };
+
   return (
+
     <AppContext.Provider
       value={{
         role,
@@ -897,7 +921,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         unlockedRoles,
         isRoleUnlocked,
         unlockRole,
-
         lockRole,
         students,
         attendance,
@@ -957,8 +980,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         sendParentInquiry,
         markParentMessageAsRead,
         acknowledgeEmergencyBroadcast,
+        // Student Exam Prep & Revision
+        pastPapers,
+        revisionChecklist,
+        toggleRevisionChecklist,
       }}
     >
+
 
       {children}
     </AppContext.Provider>
