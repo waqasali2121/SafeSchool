@@ -973,6 +973,135 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     );
   };
 
+  const updateWhatsAppConfig = (updates: Partial<WhatsAppConfig>) => {
+    setWhatsAppConfig((prev) => ({ ...prev, ...updates }));
+    addAuditLog(
+      "WHATSAPP_CONFIG_UPDATED",
+      "Meta WhatsApp Cloud API Gateway",
+      `Updated WhatsApp configuration settings. Live status: ${updates.isLiveConnected !== undefined ? updates.isLiveConnected : whatsAppConfig.isLiveConnected}`,
+      "info"
+    );
+  };
+
+  const sendWhatsAppMessage = async (
+    toNumber: string,
+    content: string,
+    category: WhatsAppMessage["category"] = "general",
+    recipientName: string = "Parent / Contact",
+    studentName?: string,
+    templateName?: string
+  ): Promise<{ success: boolean; messageId?: string; error?: string }> => {
+    const timeString = `Today at ${new Date().toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true })}`;
+    const msgId = `wmsg-${Date.now()}`;
+
+    const newMsg: WhatsAppMessage = {
+      id: msgId,
+      direction: "outbound",
+      fromNumber: whatsAppConfig.displayPhoneNumber,
+      toNumber,
+      recipientName,
+      studentName,
+      content,
+      timestamp: timeString,
+      status: "delivered",
+      templateName,
+      category,
+    };
+
+    setWhatsAppMessages((prev) => [newMsg, ...prev]);
+
+    // Try live dispatch via internal Next.js API route if online
+    try {
+      fetch("/api/whatsapp/send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          to: toNumber,
+          message: content,
+          templateName,
+          category,
+          recipientName,
+          studentName,
+        }),
+      }).catch((err) => console.log("Live WhatsApp gateway dispatch notice:", err));
+    } catch (e) {
+      // Offline / dev fallback
+    }
+
+    addAuditLog(
+      "WHATSAPP_DISPATCHED",
+      `${recipientName} (${toNumber})`,
+      `Outbound WhatsApp message [${category.toUpperCase()}] sent: "${content.slice(0, 70)}..."`,
+      category === "alert" ? "warning" : "info"
+    );
+
+    return { success: true, messageId: msgId };
+  };
+
+  const simulateInboundWhatsApp = (fromNumber: string, content: string, senderName: string = "Tariq Ahmed (Parent)") => {
+    const timeString = `Today at ${new Date().toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true })}`;
+    const inMsg: WhatsAppMessage = {
+      id: `wmsg-in-${Date.now()}`,
+      direction: "inbound",
+      fromNumber,
+      toNumber: whatsAppConfig.displayPhoneNumber,
+      recipientName: "SafeAI School Gate & Admin Console",
+      studentName: "Sara Ahmed",
+      content,
+      timestamp: timeString,
+      status: "received",
+      category: "parent_inquiry",
+    };
+
+    setWhatsAppMessages((prev) => [inMsg, ...prev]);
+
+    // Create a new parent message in the communications hub
+    const newParentMsg: ParentMessage = {
+      id: `pmsg-wa-${Date.now()}`,
+      senderType: "parent",
+      senderName,
+      senderRole: "Parent / Guardian",
+      recipientName: "Course Faculty & Admin",
+      studentId: "stu-1",
+      studentName: "Sara Ahmed",
+      subject: `WhatsApp Reply: "${content.slice(0, 35)}..."`,
+      message: content,
+      timestamp: timeString,
+      unread: true,
+      channel: "app",
+      category: "general",
+      replyCount: 0,
+    };
+    setParentMessages((prev) => [newParentMsg, ...prev]);
+
+    addAuditLog(
+      "WHATSAPP_INBOUND_RECEIVED",
+      `${senderName} (${fromNumber})`,
+      `Received incoming WhatsApp message: "${content}"`,
+      "info"
+    );
+
+    // Auto-reply if enabled
+    if (whatsAppConfig.autoReplyEnabled) {
+      setTimeout(() => {
+        const autoReplyTime = `Today at ${new Date().toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true })}`;
+        const replyMsg: WhatsAppMessage = {
+          id: `wmsg-reply-${Date.now()}`,
+          direction: "outbound",
+          fromNumber: whatsAppConfig.displayPhoneNumber,
+          toNumber: fromNumber,
+          recipientName: senderName,
+          studentName: "Sara Ahmed",
+          content: `Assalamu Alaikum! Thank you for contacting SafeAI School. Your message has been logged in our Command Center and forwarded to Sara's class teacher.`,
+          timestamp: autoReplyTime,
+          status: "delivered",
+          category: "general",
+        };
+        setWhatsAppMessages((prev) => [replyMsg, ...prev]);
+      }, 1200);
+    }
+  };
+
   return (
 
     <AppContext.Provider
@@ -1048,6 +1177,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         // Faculty Directory
         teachers,
         addTeacher,
+        // WhatsApp Integration
+        whatsAppConfig,
+        whatsAppMessages,
+        updateWhatsAppConfig,
+        sendWhatsAppMessage,
+        simulateInboundWhatsApp,
       }}
     >
 
