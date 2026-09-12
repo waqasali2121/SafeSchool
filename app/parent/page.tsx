@@ -16,12 +16,22 @@ import {
   AlertTriangle,
   Radio,
   Sparkles,
+  HeartPulse,
+  Smartphone,
+  Mail,
 } from "lucide-react";
 
 export default function ParentPage() {
-  const { students, attendance, notifications, homework, marks, triggerSos, isSosActive } = useApp();
+  const { students, attendance, notifications, homework, marks, triggerSos, isSosActive, alerts } = useApp();
   const daughter = students[0]; // Sara Ahmed
   const todayAttendance = attendance.find((a) => a.studentId === daughter?.id);
+
+  const relevantAlerts = alerts.filter(
+    (a) =>
+      a.targetType === "all" ||
+      (a.targetType === "class" && a.className?.includes("10 - Lily")) ||
+      (a.targetType === "individual" && (a.studentId === daughter?.id || a.studentName === daughter?.fullName))
+  );
 
   const parentNotifications = notifications.filter(
     (n) => n.recipientRole === "parent" || n.recipientId === "par-1" || n.recipientId === "u-all"
@@ -90,6 +100,72 @@ export default function ParentPage() {
       {/* 2. Main Grid: Child Safety Feed + Geofence Radar */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
+          {/* Active High-Priority Alerts & Medical Flags */}
+          {relevantAlerts.length > 0 && (
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <HeartPulse className="w-4 h-4 text-rose-500 animate-pulse" />
+                <h3 className="font-extrabold text-sm text-slate-900 dark:text-white uppercase tracking-wider">
+                  Active Priority Student & Medical Flags ({relevantAlerts.length})
+                </h3>
+              </div>
+
+              <div className="space-y-2.5">
+                {relevantAlerts.map((alt) => (
+                  <div
+                    key={alt.id}
+                    className={`p-4 rounded-2xl border transition ${
+                      alt.category === "medical"
+                        ? "bg-rose-50/80 dark:bg-rose-950/30 border-rose-200 dark:border-rose-900"
+                        : alt.category === "emergency"
+                        ? "bg-red-50/80 dark:bg-red-950/30 border-red-200 dark:border-red-900"
+                        : "bg-purple-50/80 dark:bg-purple-950/30 border-purple-200 dark:border-purple-900"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2">
+                        <span
+                          className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase ${
+                            alt.severity === "critical"
+                              ? "bg-red-600 text-white"
+                              : "bg-rose-500 text-white"
+                          }`}
+                        >
+                          {alt.category.toUpperCase()} ALERT
+                        </span>
+                        <span className="font-extrabold text-xs text-slate-900 dark:text-white">
+                          {alt.title}
+                        </span>
+                      </div>
+                      <span className="text-[10px] text-slate-400 font-semibold">{alt.createdAt}</span>
+                    </div>
+
+                    <p className="text-xs text-slate-700 dark:text-slate-300 mt-1.5 leading-relaxed">
+                      {alt.message}
+                    </p>
+
+                    <div className="flex items-center justify-between pt-2 mt-2 border-t border-slate-200/60 dark:border-slate-800 text-[10px]">
+                      <div className="flex items-center gap-1.5 text-slate-500">
+                        <span>Delivered via:</span>
+                        {alt.channels.map((ch) => (
+                          <span
+                            key={ch}
+                            className="px-1.5 py-0.2 rounded font-bold uppercase bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700"
+                          >
+                            {ch}
+                          </span>
+                        ))}
+                      </div>
+                      <span className="text-emerald-600 dark:text-emerald-400 font-bold flex items-center gap-1">
+                        <CheckCircle2 className="w-3 h-3" /> Confirmed Delivered to Guardian
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Real-time Notifications Feed */}
           <div className="rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-6 shadow-sm">
             <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800 mb-4">

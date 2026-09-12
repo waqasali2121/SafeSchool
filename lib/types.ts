@@ -17,6 +17,8 @@ export interface SchoolClass {
   section: string;
   roomNumber: string;
   studentCount?: number;
+  capacity?: number;
+  classTeacher?: string;
 }
 
 export interface Subject {
@@ -25,6 +27,7 @@ export interface Subject {
   code: string;
   classId: string;
   teacherName?: string;
+  periodsPerWeek?: number;
 }
 
 export interface Student {
@@ -211,4 +214,118 @@ export interface Flashcard {
   answer: string;
   topic: string;
   subject: string;
+}
+
+export type AlertCategory = "emergency" | "medical" | "behavioral" | "academic" | "announcement";
+export type AlertSeverity = "critical" | "high" | "normal";
+export type AlertChannel = "sms" | "push" | "email" | "whatsapp";
+
+export interface StudentAlert {
+  id: string;
+  targetType: "all" | "class" | "individual";
+  studentId?: string;
+  studentName?: string;
+  classId?: string;
+  className?: string;
+  category: AlertCategory;
+  severity: AlertSeverity;
+  title: string;
+  message: string;
+  channels: AlertChannel[];
+  deliveryStatus: "delivered" | "delivering" | "failed";
+  deliveredCount?: number;
+  readCount?: number;
+  totalRecipients?: number;
+  dispatchedBy: string;
+  createdAt: string;
+  actionRequired?: boolean;
+}
+
+export type AccountStatus = "active" | "suspended" | "revoked";
+
+export interface UserAccount {
+  id: string;
+  fullName: string;
+  email: string;
+  phone: string;
+  role: UserRole;
+  status: AccountStatus;
+  createdAt: string;
+  lastLogin?: string;
+  avatarUrl?: string;
+  employeeId?: string;
+  department?: string;
+  qualification?: string;
+  assignedClasses?: string[];
+  rollNumber?: string;
+  className?: string;
+  parentId?: string;
+  parentName?: string;
+  rfidCardId?: string;
+  qrCodeToken?: string;
+  relationship?: "Mother" | "Father" | "Guardian";
+  studentNames?: string[];
+}
+
+export interface RBACRolePermissions {
+  role: UserRole;
+  canMarkAttendance: boolean;
+  canScanQrRfid: boolean;
+  canIssueEmergencyAlerts: boolean;
+  canIssueMedicalAlerts: boolean;
+  canManageUsers: boolean;
+  canManageStructure: boolean;
+  canUploadCurriculum: boolean;
+  canViewAuditLogs: boolean;
+  canAssignHomework: boolean;
+  canRecordMarks: boolean;
+}
+
+export interface AcademicEvent {
+  id: string;
+  title: string;
+  type: "term" | "exam" | "holiday" | "event" | "meeting";
+  startDate: string;
+  endDate: string;
+  term: "Fall 2026" | "Spring 2027";
+  description?: string;
+  isImportant?: boolean;
+}
+
+export interface TimetableSlot {
+  id: string;
+  classId: string;
+  className: string;
+  day: "Monday" | "Tuesday" | "Wednesday" | "Thursday" | "Friday";
+  periodNumber: number;
+  startTime: string;
+  endTime: string;
+  subjectName: string;
+  teacherName: string;
+  roomNumber: string;
+}
+
+export interface AuditLogEntry {
+  id: string;
+  timestamp: string;
+  actorName: string;
+  actorRole: UserRole;
+  action: string;
+  targetEntity: string;
+  ipAddress: string;
+  severity: "info" | "warning" | "critical";
+  details: string;
+}
+
+export interface TeacherCompliance {
+  teacherId: string;
+  teacherName: string;
+  department: string;
+  attendanceSubmissionRate: number;
+  lessonPlansUploaded: number;
+  lessonPlansRequired: number;
+  homeworkAssignedCount: number;
+  marksEnteredRate: number;
+  complianceStatus: "compliant" | "warning" | "overdue";
+  lastActive: string;
 }

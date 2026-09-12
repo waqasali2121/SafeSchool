@@ -25,6 +25,10 @@ import {
   Radio,
   Clock,
   Compass,
+  BellRing,
+  Building2,
+  UserPlus,
+  ShieldCheck,
 } from "lucide-react";
 
 export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose?: () => void }) {
@@ -36,15 +40,19 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose?: () => 
       case "admin":
         return [
           { href: "/admin", label: "Overview & Campus Safety", icon: <LayoutDashboard className="w-4 h-4" /> },
+          { href: "/admin/alerts", label: "Student Alert System", icon: <BellRing className="w-4 h-4 text-rose-500" />, badge: "SMS/Push" },
+          { href: "/admin/users", label: "User Accounts & RBAC", icon: <UserPlus className="w-4 h-4 text-blue-500" />, badge: "RBAC" },
+          { href: "/admin/structure", label: "School Structure Setup", icon: <Building2 className="w-4 h-4 text-emerald-500" />, badge: "Setup" },
           { href: "/admin/students", label: "Student Registry", icon: <Users className="w-4 h-4" /> },
           { href: "/admin/teachers", label: "Faculty Directory", icon: <GraduationCap className="w-4 h-4" /> },
           { href: "/admin/documents", label: "RAG Knowledge Base", icon: <BookOpen className="w-4 h-4" />, badge: "AI" },
-          { href: "/admin/analytics", label: "Attendance Analytics", icon: <BarChart3 className="w-4 h-4" /> },
+          { href: "/admin/analytics", label: "Analytics & Audit Logs", icon: <BarChart3 className="w-4 h-4 text-violet-500" />, badge: "Audit" },
         ];
       case "teacher":
         return [
           { href: "/teacher", label: "Teacher Command Center", icon: <LayoutDashboard className="w-4 h-4" /> },
           { href: "/teacher/attendance", label: "Smart Attendance Marker", icon: <QrCode className="w-4 h-4" />, badge: "QR/RFID" },
+          { href: "/admin/alerts", label: "Issue Parent Alert", icon: <BellRing className="w-4 h-4 text-rose-500" />, badge: "Urgent" },
           { href: "/teacher/homework", label: "Homework Manager", icon: <CheckSquare className="w-4 h-4" /> },
           { href: "/teacher/marks", label: "Marks & Gradebook", icon: <Award className="w-4 h-4" /> },
           { href: "/teacher/mcq-generator", label: "MCQ & Quiz Builder", icon: <Sparkles className="w-4 h-4" />, badge: "AI" },

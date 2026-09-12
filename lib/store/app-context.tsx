@@ -11,6 +11,15 @@ import {
   RAGDocument,
   ChatMessage,
   EmergencyContact,
+  StudentAlert,
+  UserAccount,
+  RBACRolePermissions,
+  AcademicEvent,
+  TimetableSlot,
+  AuditLogEntry,
+  TeacherCompliance,
+  SchoolClass,
+  Subject,
 } from "../types";
 import {
   INITIAL_STUDENTS,
@@ -20,6 +29,15 @@ import {
   INITIAL_MARKS,
   INITIAL_DOCUMENTS,
   EMERGENCY_CONTACTS,
+  INITIAL_CLASSES,
+  INITIAL_SUBJECTS,
+  INITIAL_STUDENT_ALERTS,
+  INITIAL_USER_ACCOUNTS,
+  DEFAULT_RBAC_PERMISSIONS,
+  INITIAL_ACADEMIC_EVENTS,
+  INITIAL_TIMETABLE,
+  INITIAL_AUDIT_LOGS,
+  INITIAL_TEACHER_COMPLIANCE,
 } from "../mock-data";
 import { generateRAGAnswer, addLocalDocument, getLocalDocuments } from "../rag/engine";
 
@@ -42,12 +60,23 @@ interface AppContextType {
     lng: number;
   } | null;
 
+  // New Domain Entities
+  alerts: StudentAlert[];
+  userAccounts: UserAccount[];
+  rbacPermissions: Record<string, RBACRolePermissions>;
+  academicEvents: AcademicEvent[];
+  timetableSlots: TimetableSlot[];
+  auditLogs: AuditLogEntry[];
+  teacherCompliance: TeacherCompliance[];
+  classes: SchoolClass[];
+  subjects: Subject[];
+
   unlockedRoles: Record<UserRole, boolean>;
   isRoleUnlocked: (role: UserRole) => boolean;
   unlockRole: (role: UserRole, usernameOrEmail: string, pass: string) => Promise<{ success: boolean; error?: string }>;
   lockRole: (role: UserRole) => void;
 
-  // Actions
+  // Existing Actions
   markAttendance: (studentId: string, status: "present" | "late" | "absent", method?: "qr_scan" | "rfid_tap" | "manual") => void;
   recordDeparture: (studentId: string) => void;
   triggerSos: (studentName?: string) => void;
@@ -58,6 +87,21 @@ interface AppContextType {
   uploadDocument: (title: string, subject: string, className: string, rawContent: string, fileType?: "pdf" | "docx" | "txt") => void;
   markNotificationAsRead: (id: string) => void;
   clearAllNotifications: () => void;
+
+  // New Core Module Actions
+  issueAlert: (alertData: Omit<StudentAlert, "id" | "createdAt" | "deliveryStatus" | "deliveredCount" | "readCount" | "totalRecipients">) => void;
+  addUserAccount: (user: Omit<UserAccount, "id" | "createdAt">) => void;
+  updateUserAccount: (id: string, updates: Partial<UserAccount>) => void;
+  setUserAccountStatus: (id: string, status: "active" | "suspended" | "revoked") => void;
+  toggleRbacPermission: (targetRole: UserRole, key: keyof Omit<RBACRolePermissions, "role">) => void;
+  addAcademicEvent: (event: Omit<AcademicEvent, "id">) => void;
+  deleteAcademicEvent: (id: string) => void;
+  addClass: (cls: Omit<SchoolClass, "id">) => void;
+  updateClass: (id: string, updates: Partial<SchoolClass>) => void;
+  addSubject: (subj: Omit<Subject, "id">) => void;
+  updateTimetableSlot: (slot: TimetableSlot) => void;
+  addAuditLog: (action: string, targetEntity: string, details: string, severity?: "info" | "warning" | "critical") => void;
+  sendComplianceReminder: (teacherId: string) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -78,6 +122,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     lat: number;
     lng: number;
   } | null>(null);
+
+  // New Core Module States
+  const [alerts, setAlerts] = useState<StudentAlert[]>(INITIAL_STUDENT_ALERTS);
+  const [userAccounts, setUserAccounts] = useState<UserAccount[]>(INITIAL_USER_ACCOUNTS);
+  const [rbacPermissions, setRbacPermissions] = useState<Record<string, RBACRolePermissions>>(DEFAULT_RBAC_PERMISSIONS);
+  const [academicEvents, setAcademicEvents] = useState<AcademicEvent[]>(INITIAL_ACADEMIC_EVENTS);
+  const [timetableSlots, setTimetableSlots] = useState<TimetableSlot[]>(INITIAL_TIMETABLE);
+  const [auditLogs, setAuditLogs] = useState<AuditLogEntry[]>(INITIAL_AUDIT_LOGS);
+  const [teacherCompliance, setTeacherCompliance] = useState<TeacherCompliance[]>(INITIAL_TEACHER_COMPLIANCE);
+  const [classes, setClasses] = useState<SchoolClass[]>(INITIAL_CLASSES);
+  const [subjects, setSubjects] = useState<Subject[]>(INITIAL_SUBJECTS);
 
   const [unlockedRoles, setUnlockedRoles] = useState<Record<UserRole, boolean>>({
     student: true,
@@ -393,6 +448,202 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
   };
 
+  const addAuditLog = (action: string, targetEntity: string, details: string, severity: "info" | "warning" | "critical" = "info") => {
+    const actorMap: Record<UserRole, string> = {
+      admin: "Principal Farah Qureshi",
+      teacher: "Dr. Amina Qureshi",
+      parent: "Tariq Ahmed",
+      student: "Sara Ahmed",
+    };
+    const timeString = `Today at ${new Date().toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true })}`;
+    const newLog: AuditLogEntry = {
+      id: `aud-${Date.now()}`,
+      timestamp: timeString,
+      actorName: actorMap[role] || "System Administrator",
+      actorRole: role,
+      action,
+      targetEntity,
+      ipAddress: "192.168.1.10 (Command Center)",
+      severity,
+      details,
+    };
+    setAuditLogs((prev) => [newLog, ...prev]);
+  };
+
+  const issueAlert = (alertData: Omit<StudentAlert, "id" | "createdAt" | "deliveryStatus" | "deliveredCount" | "readCount" | "totalRecipients">) => {
+    const timeString = `Today at ${new Date().toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true })}`;
+    const totalRecipients = alertData.targetType === "all" ? students.length : alertData.targetType === "class" ? 28 : 1;
+    const newAlert: StudentAlert = {
+      ...alertData,
+      id: `alt-${Date.now()}`,
+      createdAt: timeString,
+      deliveryStatus: "delivered",
+      deliveredCount: totalRecipients,
+      readCount: Math.max(1, Math.floor(totalRecipients * 0.85)),
+      totalRecipients,
+    };
+    setAlerts((prev) => [newAlert, ...prev]);
+
+    // Push parent notification
+    const newNotif: NotificationItem = {
+      id: `notif-alt-${Date.now()}`,
+      recipientId: alertData.studentId ? "par-1" : "u-all",
+      recipientRole: "parent",
+      category: alertData.category === "emergency" ? "emergency" : alertData.category === "academic" ? "marks" : "announcements",
+      title: `${alertData.severity.toUpperCase()} ALERT: ${alertData.title}`,
+      message: `${alertData.message} [Channels: ${alertData.channels.join(", ").toUpperCase()}]`,
+      read: false,
+      channel: alertData.channels.includes("whatsapp") ? "whatsapp" : alertData.channels.includes("sms") ? "sms" : "app",
+      createdAt: "Just now",
+      studentName: alertData.studentName,
+      urgent: alertData.severity === "critical" || alertData.severity === "high",
+    };
+    setNotifications((prev) => [newNotif, ...prev]);
+
+    addAuditLog(
+      "ALERT_DISPATCHED",
+      alertData.studentName ? `${alertData.studentName} (${alertData.category})` : `Broadcast (${alertData.category})`,
+      `Dispatched ${alertData.severity} alert "${alertData.title}" across ${alertData.channels.join(", ")} to ${totalRecipients} recipients.`,
+      alertData.severity === "critical" ? "critical" : alertData.severity === "high" ? "warning" : "info"
+    );
+  };
+
+  const addUserAccount = (user: Omit<UserAccount, "id" | "createdAt">) => {
+    const newAccount: UserAccount = {
+      ...user,
+      id: `usr-${Date.now()}`,
+      createdAt: new Date().toISOString().split("T")[0],
+      lastLogin: "Never",
+    };
+    setUserAccounts((prev) => [newAccount, ...prev]);
+    addAuditLog(
+      "USER_PROVISIONED",
+      `${user.fullName} (${user.role.toUpperCase()})`,
+      `Created new user account with role ${user.role} and status ${user.status}.`,
+      "info"
+    );
+  };
+
+  const updateUserAccount = (id: string, updates: Partial<UserAccount>) => {
+    setUserAccounts((prev) =>
+      prev.map((u) => (u.id === id ? { ...u, ...updates } : u))
+    );
+    const existing = userAccounts.find((u) => u.id === id);
+    addAuditLog(
+      "USER_UPDATED",
+      existing ? `${existing.fullName} (${existing.role})` : id,
+      `Updated user profile details and assignments.`,
+      "info"
+    );
+  };
+
+  const setUserAccountStatus = (id: string, status: "active" | "suspended" | "revoked") => {
+    setUserAccounts((prev) =>
+      prev.map((u) => (u.id === id ? { ...u, status } : u))
+    );
+    const existing = userAccounts.find((u) => u.id === id);
+    addAuditLog(
+      "USER_STATUS_UPDATED",
+      existing ? `${existing.fullName} (${existing.role})` : id,
+      `Changed account status to ${status.toUpperCase()}.`,
+      status === "revoked" || status === "suspended" ? "critical" : "info"
+    );
+  };
+
+  const toggleRbacPermission = (targetRole: UserRole, key: keyof Omit<RBACRolePermissions, "role">) => {
+    setRbacPermissions((prev) => {
+      const current = prev[targetRole] || { ...DEFAULT_RBAC_PERMISSIONS[targetRole] };
+      const updated = {
+        ...prev,
+        [targetRole]: {
+          ...current,
+          [key]: !current[key],
+        },
+      };
+      return updated;
+    });
+    addAuditLog(
+      "RBAC_UPDATED",
+      `Role: ${targetRole.toUpperCase()}`,
+      `Toggled permission "${String(key)}".`,
+      "warning"
+    );
+  };
+
+  const addAcademicEvent = (event: Omit<AcademicEvent, "id">) => {
+    const newEvent: AcademicEvent = {
+      ...event,
+      id: `evt-${Date.now()}`,
+    };
+    setAcademicEvents((prev) => [...prev, newEvent]);
+    addAuditLog("CALENDAR_EVENT_ADDED", event.title, `Scheduled ${event.type} event from ${event.startDate} to ${event.endDate}.`, "info");
+  };
+
+  const deleteAcademicEvent = (id: string) => {
+    const target = academicEvents.find((e) => e.id === id);
+    setAcademicEvents((prev) => prev.filter((e) => e.id !== id));
+    if (target) {
+      addAuditLog("CALENDAR_EVENT_DELETED", target.title, `Removed academic event from calendar.`, "warning");
+    }
+  };
+
+  const addClass = (cls: Omit<SchoolClass, "id">) => {
+    const newClass: SchoolClass = {
+      ...cls,
+      id: `c-${Date.now()}`,
+    };
+    setClasses((prev) => [...prev, newClass]);
+    addAuditLog("CLASS_CREATED", newClass.name, `Added class section with capacity ${newClass.capacity || 30}.`, "info");
+  };
+
+  const updateClass = (id: string, updates: Partial<SchoolClass>) => {
+    setClasses((prev) => prev.map((c) => (c.id === id ? { ...c, ...updates } : c)));
+    addAuditLog("CLASS_UPDATED", id, `Updated class parameters.`, "info");
+  };
+
+  const addSubject = (subj: Omit<Subject, "id">) => {
+    const newSubj: Subject = {
+      ...subj,
+      id: `sub-${Date.now()}`,
+    };
+    setSubjects((prev) => [...prev, newSubj]);
+    addAuditLog("SUBJECT_CREATED", newSubj.name, `Configured new subject ${newSubj.code} with lead educator ${newSubj.teacherName}.`, "info");
+  };
+
+  const updateTimetableSlot = (slot: TimetableSlot) => {
+    setTimetableSlots((prev) => prev.map((s) => (s.id === slot.id ? slot : s)));
+    addAuditLog(
+      "TIMETABLE_SLOT_UPDATED",
+      `${slot.className} (${slot.day} P${slot.periodNumber})`,
+      `Reassigned period to ${slot.subjectName} with ${slot.teacherName} in ${slot.roomNumber}.`,
+      "info"
+    );
+  };
+
+  const sendComplianceReminder = (teacherId: string) => {
+    const teacher = teacherCompliance.find((t) => t.teacherId === teacherId);
+    if (!teacher) return;
+    const notif: NotificationItem = {
+      id: `notif-rem-${Date.now()}`,
+      recipientId: teacherId,
+      recipientRole: "teacher",
+      category: "announcements",
+      title: "Action Required: Educational Compliance Notice",
+      message: `Dear ${teacher.teacherName}, please update your pending curriculum uploads, weekly homework assignments, and attendance logs.`,
+      read: false,
+      channel: "app",
+      createdAt: "Just now",
+      urgent: true,
+    };
+    setNotifications((prev) => [notif, ...prev]);
+    addAuditLog(
+      "COMPLIANCE_REMINDER_SENT",
+      teacher.teacherName,
+      `Dispatched urgent compliance follow-up notification. Attendance rate: ${teacher.attendanceSubmissionRate}%, Uploads: ${teacher.lessonPlansUploaded}/${teacher.lessonPlansRequired}.`,
+      "warning"
+    );
+  };
+
   return (
     <AppContext.Provider
       value={{
@@ -422,6 +673,30 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         uploadDocument,
         markNotificationAsRead,
         clearAllNotifications,
+        // Core Module Entities
+        alerts,
+        userAccounts,
+        rbacPermissions,
+        academicEvents,
+        timetableSlots,
+        auditLogs,
+        teacherCompliance,
+        classes,
+        subjects,
+        // Core Module Handlers
+        issueAlert,
+        addUserAccount,
+        updateUserAccount,
+        setUserAccountStatus,
+        toggleRbacPermission,
+        addAcademicEvent,
+        deleteAcademicEvent,
+        addClass,
+        updateClass,
+        addSubject,
+        updateTimetableSlot,
+        addAuditLog,
+        sendComplianceReminder,
       }}
     >
       {children}
