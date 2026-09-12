@@ -52,12 +52,12 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           {/* Brand Logo Presentation */}
           <div className="flex justify-center mb-6">
-            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden bg-white border-2 border-pink-200 dark:border-pink-900 shadow-xl shadow-pink-500/10 flex items-center justify-center p-1 hover:scale-105 transition-transform">
+            <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full overflow-hidden bg-white border-2 border-pink-200 dark:border-pink-900 shadow-xl shadow-pink-500/10 flex items-center justify-center p-0.5 hover:scale-105 transition-transform">
               <Image
                 src="/logo.png"
                 alt="SafeAI School Logo"
-                width={96}
-                height={96}
+                width={112}
+                height={112}
                 className="w-full h-full object-contain"
                 priority
               />

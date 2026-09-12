@@ -56,12 +56,12 @@ export function Navbar({ onToggleSidebar }: { onToggleSidebar?: () => void }) {
           )}
 
           <Link href="/" className="flex items-center gap-2.5 group">
-            <div className="w-10 h-10 rounded-full overflow-hidden flex items-center justify-center shadow-md border border-slate-200 dark:border-slate-700 bg-white group-hover:scale-105 transition-transform shrink-0">
+            <div className="w-11 h-11 rounded-full overflow-hidden flex items-center justify-center shadow-md border border-slate-200 dark:border-slate-700 bg-white group-hover:scale-105 transition-transform shrink-0">
               <Image
                 src="/logo.png"
                 alt="SafeAI School Logo"
-                width={40}
-                height={40}
+                width={44}
+                height={44}
                 className="w-full h-full object-contain"
                 priority
               />

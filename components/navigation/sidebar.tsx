@@ -113,12 +113,12 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose?: () => 
             {/* Active Persona Banner */}
             <div className="p-3.5 rounded-2xl bg-gradient-to-tr from-pink-50 to-violet-50 dark:from-pink-950/20 dark:to-violet-950/20 border border-pink-100 dark:border-pink-900/40">
               <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-full overflow-hidden bg-white border border-slate-200 dark:border-slate-700 flex items-center justify-center shrink-0 shadow-sm">
+                <div className="w-10 h-10 rounded-full overflow-hidden bg-white border border-slate-200 dark:border-slate-700 flex items-center justify-center shrink-0 shadow-sm">
                   <Image
                     src="/logo.png"
                     alt="SafeAI School"
-                    width={36}
-                    height={36}
+                    width={40}
+                    height={40}
                     className="w-full h-full object-contain"
                   />
                 </div>
