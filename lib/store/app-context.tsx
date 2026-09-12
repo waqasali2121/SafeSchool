@@ -191,6 +191,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [pastPapers] = useState<PastExamPaper[]>(INITIAL_PAST_PAPERS);
   const [revisionChecklist, setRevisionChecklist] = useState<RevisionChecklistItem[]>(INITIAL_REVISION_CHECKLIST);
   const [teachers, setTeachers] = useState<Teacher[]>(INITIAL_TEACHERS);
+  const [whatsAppConfig, setWhatsAppConfig] = useState<WhatsAppConfig>(INITIAL_WHATSAPP_CONFIG);
+  const [whatsAppMessages, setWhatsAppMessages] = useState<WhatsAppMessage[]>(INITIAL_WHATSAPP_MESSAGES);
 
 
   const [unlockedRoles, setUnlockedRoles] = useState<Record<UserRole, boolean>>({
